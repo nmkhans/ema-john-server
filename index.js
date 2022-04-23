@@ -24,6 +24,13 @@ const server = async () => {
         await client.connect();
         const database = client.db('ema-john').collection('product');
 
+        // get all products
+        app.get('/product', async (req, res) => {
+            const query = {};
+            const cursor = database.find(query)
+            const result = await cursor.toArray();
+            res.send(result);
+        })
     }
 
     finally {
