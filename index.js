@@ -26,10 +26,34 @@ const server = async () => {
 
         // get all products
         app.get('/product', async (req, res) => {
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
             const query = {};
             const cursor = database.find(query)
-            const result = await cursor.toArray();
+            let result;
+            if (page || size) {
+                result = await cursor.skip(page * size).limit(size).toArray();
+            } else {
+                result = await cursor.toArray();
+            }
+
             res.send(result);
+        })
+
+        // count all Product
+        app.get('/productCount', async (req, res) => {
+            const count = await database.estimatedDocumentCount();
+            res.send({ count });
+        })
+
+        // post products by id to get
+        app.post('/productsById', async (req, res) => {
+            const keys = req.body;
+            const ids = keys.map(id => ObjectId(id));
+            const query = {_id: {$in: ids}};
+            const cursor = database.find(query);
+            const products = await cursor.toArray();
+            res.send(products)
         })
     }
 
